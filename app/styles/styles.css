@@ -1,0 +1,65 @@
+body{
+	color: #222;
+	font-family: HelveticaNeue-Light, "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+
+.sketches {
+	float: left;
+}
+
+.sketches canvas {
+	position: absolute;
+	left: 0;
+	z-index: -1;
+}
+
+.sketch {
+	/*background-color: #f0f0f0;*/
+	border: black solid 1px;
+	padding: 9px;
+	margin-left: 5px;
+	margin-right: 5px;
+	float: left;
+}
+
+.sketch_canvas {
+	position: relative;
+	height: 460px;
+	width: 460px;
+}
+
+.sketch_canvas:after {
+}
+
+.sketch_description {
+	margin-bottom: 10px;
+	height: 100px;
+}
+
+.sketch_description_main {
+	font-size: 2em;
+	font-weight: 300;
+}
+
+.sketch_description_sub {
+	font-size: 1em;
+	width: 460px;
+}
+
+.container {
+	margin-top: 40px;
+	width: 980px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.header {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+h1 {
+	font-size: 4em;
+	font-weight: 200;
+	margin: 0;
+}
