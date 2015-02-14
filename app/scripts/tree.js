@@ -114,13 +114,13 @@
 
        // Override draw function, by default it will be called 60 times per second
         p.draw = function () {
-            p.background(255);
+            p.background(255, 0, 0, 0);
             drawLine(230, 460, -Math.PI / 2, 460 / 4);
         };
     };
 
     var title = 'Tree';
-    var description = 'A simple tree with quite sophisticated branching.';
+    var description = 'A simple tree with sophisticated branching.';
 
     sketches.tree = {
         sketch: sketch,

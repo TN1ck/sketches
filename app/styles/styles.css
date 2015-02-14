@@ -10,7 +10,6 @@ body{
 .sketches canvas {
 	position: absolute;
 	left: 0;
-	z-index: -1;
 }
 
 .sketch {
@@ -23,13 +22,14 @@ body{
 	float: left;
 }
 
+/*.sketch:hover {
+	background-color: #ddd;
+}*/
+
 .sketch_canvas {
 	position: relative;
 	height: 460px;
 	width: 460px;
-}
-
-.sketch_canvas:after {
 }
 
 .sketch_description {
@@ -48,10 +48,9 @@ body{
 }
 
 .container {
-	float: left;
-	margin-top: 40px;
+	/*float: left;*/
 	margin-bottom: 40px;
-	max-width: 980px;
+	width: 980px;
 	margin-left: auto;
 	margin-right: auto;
 }
