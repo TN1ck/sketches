@@ -19,6 +19,7 @@ body{
 	padding: 9px;
 	margin-left: 5px;
 	margin-right: 5px;
+	margin-bottom: 10px;
 	float: left;
 }
 
@@ -47,8 +48,10 @@ body{
 }
 
 .container {
+	float: left;
 	margin-top: 40px;
-	width: 980px;
+	margin-bottom: 40px;
+	max-width: 980px;
 	margin-left: auto;
 	margin-right: auto;
 }
