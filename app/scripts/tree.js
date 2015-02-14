@@ -13,11 +13,43 @@
             return Math.PI / 360 * deg;
         };
 
+        var toX = function(r, rad) {
+            return r * Math.cos(rad);
+        };
+
+        var toY = function(r, rad) {
+            return r * Math.sin(rad);
+        };
+
+        var drawQuad = function(x1, y1, x2, y2, l1, l2, rad) {
+            
+            p.fill(0);
+            p.stroke(0, 0, 0, 0);
+
+            var radOrt = rad + Math.PI / 2;
+            var ln = l1 / 2;
+            var cs = [];
+            
+            cs.push(x1 + toX(ln, radOrt));
+            cs.push(y1 + toY(ln, radOrt));
+            cs.push(x1 + toX(-ln, radOrt));
+            cs.push(y1 + toY(-ln, radOrt));
+            
+            ln = l2 / 2;
+            cs.push(x2 + toX(-ln, radOrt));
+            cs.push(y2 + toY(-ln, radOrt));
+            cs.push(x2 + toX(ln, radOrt));
+            cs.push(y2 + toY(ln, radOrt));
+
+            p.quad.apply(this, cs);
+        };
+
         var drawLine = function(x, y, radian, length) {
 
-            var threshold = 6;
+            var threshold = 5;
             var branches = p.random(2, 5);
-            var strokeWeight = 0.1 * length;
+            // var branches = 1;
+            var strokeWeight = 0.08 * length;
 
             length *= (p.random(8, 12) / 10);
 
@@ -31,33 +63,44 @@
             var radD = degToRad(p.random(minrad, maxrad));
             // var radD = 0;
 
-            var xD = length * Math.cos(radian + radD);
-            var yD = length * Math.sin(radian + radD);
+            var rN = radian + radD;
+
+            var xD = toX(length, rN);
+            var yD = toY(length, rN);
 
             var xN = xD + x;
             var yN = yD + y;
 
-            p.strokeWeight(strokeWeight);
-            p.line(x, y, xN, yN);
+            p.strokeWeight(strokeWeight * 0.4);
+            if (strokeWeight < 2) {
+                p.strokeWeight(strokeWeight);
+                p.line(x, y, xN, yN);
+            } else {
+                drawQuad(x, y, xN, yN, strokeWeight, strokeWeight / 2, rN);
+            }
 
-            var radRange = p.random(160, 200);
+            var radRange = p.random(180, 220);
 
-            var start = -radRange / 2;
+            var start = -radRange / 1.7; // no idea why it looks better than with 2
             var step  = radRange / branches;
-            
-            var strokeStart = -strokeWeight / 2;
-            var strokeStep = strokeWeight / branches;
-            var strokeRad = radian + Math.PI / 4;
 
             for (var i = 1; i <= branches; i++) {
                 
                 var rad = start + step * i;
-                var lengthD = strokeStart + strokeStep * i;
 
-                var xDD = lengthD * Math.cos(strokeRad);
-                var yDD = lengthD * Math.sin(strokeRad);
+                var randomLength = p.random(-length / 3);
 
-                drawLine(xN + xDD, yN + yDD, radian + radD + degToRad(rad), length / 1.5);
+                var xNN = xN + toX(randomLength, rN);
+                var yNN = yN + toY(randomLength, rN);
+                var rNN = rN + degToRad(rad);
+
+                // the first branch will be drawn directly on top of the last one
+                if (i === Math.ceil(branches / 2)) {
+                    xNN = xN;
+                    yNN = yN;
+                }
+
+                drawLine(xNN, yNN, rNN, length / 1.5);
             }
         };
 
@@ -77,7 +120,7 @@
     };
 
     var title = 'Tree';
-    var description = 'A simple tree with random branching.';
+    var description = 'A simple tree with quite sophisticated branching.';
 
     sketches.tree = {
         sketch: sketch,
