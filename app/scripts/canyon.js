@@ -50,6 +50,7 @@
 
         var drawShape = function (lines1) {
 
+            p.fill(255);
             p.strokeWeight(1);
             p.beginShape();
             lines1.forEach(function (line) {
@@ -75,8 +76,6 @@
 
         var drawStripes = function (lines1) {
 
-            var stripeStep = 6;
-
             lines1.forEach(function (line1) {
                 
                 var l1x1 = line1[0];
@@ -88,20 +87,30 @@
                 var l1yrange = l1y2 - l1y1;
                 
                 var length = Math.sqrt(Math.pow(l1xrange, 2) + Math.pow(l1yrange, 2));
-                var strokey = (l1yrange / length) * 2;
-                var strokeWeight = (strokey < 0 ? strokey * 0.5 : strokey) + 1;
-                // console.log(strokeWeight)
-                p.strokeWeight(strokeWeight);
-                p.strokeCap(p.SQUARE);
+                var strokey = (l1yrange / length);
+                
+                // var strokeWeight = (strokey < 0 ? strokey * 0.5 : strokey) + 1;
+                // p.strokeWeight(strokeWeight);
+                // p.strokeCap(p.SQUARE);
 
-                var steps = length / stripeStep;
-                // var steps = 10;
-                // console.log(steps);
-                for (var j = 0; j < steps; j++) {
-                    var xn = l1x1 + l1xrange / steps * j;
-                    var yn = l1y1 + l1yrange / steps * j;
-                    p.line(xn, yn, xn, yn + 200);
-                }
+                var fill = Math.max(0, Math.min(110 + strokey * 120, 255));
+
+                p.fill(fill);
+                p.beginShape();
+                p.vertex(l1x1, l1y1);
+                p.vertex(l1x2, l1y2);
+                p.vertex(l1x2, l1y2 + 200);
+                p.vertex(l1x1, l1y1 + 200);
+                p.endShape();
+
+                // var steps = length / stripeStep;
+                // // var steps = 10;
+                // // console.log(steps);
+                // for (var j = 0; j < steps; j++) {
+                //     var xn = l1x1 + l1xrange / steps * j;
+                //     var yn = l1y1 + l1yrange / steps * j;
+                //     // p.line(xn, yn, xn, yn + 200);
+                // }
 
             });
 
@@ -162,7 +171,7 @@
 
 
     var title = 'Canyon';
-    var description = 'An attempt to create a canyion-like visualisation. The stroke width is set according to the slope to create a light-impression.';
+    var description = 'An attempt to create a canyion-like visualisation. The color is set according to the slope to create a light-impression.';
 
     sketches.canyon = {
         sketch: sketch,
