@@ -48,9 +48,9 @@
             });
         };
 
-        var drawShape = function (lines1) {
+        var drawShape = function (lines1, i) {
 
-            p.fill(255);
+            p.fill(100 + i * 15);
             p.strokeWeight(1);
             p.beginShape();
             lines1.forEach(function (line) {
@@ -88,14 +88,12 @@
                 
                 var length = Math.sqrt(Math.pow(l1xrange, 2) + Math.pow(l1yrange, 2));
                 var strokey = (l1yrange / length);
-                
-                // var strokeWeight = (strokey < 0 ? strokey * 0.5 : strokey) + 1;
-                // p.strokeWeight(strokeWeight);
-                // p.strokeCap(p.SQUARE);
+
+                p.strokeCap(p.SQUARE);
 
                 var fill = Math.max(0, Math.min(110 + strokey * 120, 255));
 
-                p.fill(fill);
+                p.fill(fill, fill, fill, 50);
                 p.beginShape();
                 p.vertex(l1x1, l1y1);
                 p.vertex(l1x2, l1y2);
@@ -103,13 +101,13 @@
                 p.vertex(l1x1, l1y1 + 200);
                 p.endShape();
 
-                // var steps = length / stripeStep;
-                // // var steps = 10;
-                // // console.log(steps);
+                // var steps = length / 5;
+                // var steps = 10;
+                // console.log(steps);
                 // for (var j = 0; j < steps; j++) {
                 //     var xn = l1x1 + l1xrange / steps * j;
                 //     var yn = l1y1 + l1yrange / steps * j;
-                //     // p.line(xn, yn, xn, yn + 200);
+                //     p.line(xn, yn, xn, yn + 200);
                 // }
 
             });
@@ -131,7 +129,7 @@
         // Override draw function, by default it will be called 60 times per second
         p.draw = function () {
             
-            p.background(0, 0, 0, 0);
+            p.background(80);
 
             var interpolatedLines = [];
 
@@ -154,17 +152,17 @@
             
             for (var i = 0; i < interpolatedLines.length; i += 2) {
                 drawStripes(interpolatedLines[i]);
-                drawShape(interpolatedLines[i + 1]);
+                drawShape(interpolatedLines[i + 1], i);
                 drawLine(interpolatedLines[i]);
             }
         };
     
         p.setup = function () {
             p.size(460, 460);
-            p.frameRate(60);
+            p.frameRate(10);
             // p.noLoop();
             p.smooth();
-            p.colorMode(p.HSB);
+            p.colorMode(p.RGB);
         };
 
     };

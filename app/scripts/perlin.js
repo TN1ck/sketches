@@ -15,7 +15,7 @@
             this.y = y;
             this.xv = 0;
             this.yv = 0;
-            this.maxSpeed = 3000000;
+            this.maxSpeed = 30000000;
 
         };
 
