@@ -13,15 +13,15 @@
             return Math.PI / 360 * deg;
         };
 
-        var toX = function(r, rad) {
+        var toX = function (r, rad) {
             return r * Math.cos(rad);
         };
 
-        var toY = function(r, rad) {
+        var toY = function (r, rad) {
             return r * Math.sin(rad);
         };
 
-        var drawQuad = function(x1, y1, x2, y2, l1, l2, rad) {
+        var drawQuad = function (x1, y1, x2, y2, l1, l2, rad) {
             
             p.fill(0);
             p.stroke(0, 0, 0, 0);
@@ -44,7 +44,7 @@
             p.quad.apply(this, cs);
         };
 
-        var drawLine = function(x, y, radian, length) {
+        var drawLine = function (x, y, radian, length) {
 
             var threshold = 5;
             var branches = p.random(2, 5);

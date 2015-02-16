@@ -9,34 +9,37 @@
 
     var sketch = function (p) {
 
-        var Point = function (x, y) {
-            
-            this.x = x;
-            this.y = y;
-            this.xv = 0;
-            this.yv = 0;
-            this.maxSpeed = 30000000;
+        class Point {
+        
+            constructor (x, y) {
+                
+                this.x = x;
+                this.y = y;
+                this.xv = 0;
+                this.yv = 0;
+                this.maxSpeed = 30000000;
 
-        };
-
-        Point.prototype.update = function () {
-            
-            p.stroke(0, 16);
-            this.xv =   Math.cos(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
-            this.yv = - Math.sin(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
-
-            if (this.x > width || this.y > height || this.x < 0 || this.y < 0) {
-                this.finished = true;
             }
 
-            this.xv = Math.max(-this.maxSpeed, Math.min(this.maxSpeed, this.xv));
-            this.yv = Math.max(-this.maxSpeed, Math.min(this.maxSpeed, this.yv));
-         
-            this.x += this.xv;
-            this.y += this.yv;
-            p.line(this.x + this.xv, this.y + this.yv, this.x, this.y);
+            update () {
+            
+                p.stroke(0, 16);
+                this.xv =   Math.cos(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
+                this.yv = - Math.sin(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
 
-        };
+                if (this.x > width || this.y > height || this.x < 0 || this.y < 0) {
+                    this.finished = true;
+                }
+
+                this.xv = Math.max(-this.maxSpeed, Math.min(this.maxSpeed, this.xv));
+                this.yv = Math.max(-this.maxSpeed, Math.min(this.maxSpeed, this.yv));
+             
+                this.x += this.xv;
+                this.y += this.yv;
+                p.line(this.x + this.xv, this.y + this.yv, this.x, this.y);
+
+            }
+        }
 
         var points = [];
         var width = 460;
@@ -62,15 +65,10 @@
 
 
         p.draw = function () {
-            
-            points = points.filter(function (point) {
-                return !point.finished;
-            });
 
-            // addPoints(20);
-            points.forEach(function (point) {
-                point.update();
-            });
+            points = points.filter(point => !point.finished);
+            points.forEach(point => point.update());
+
         };
     };
 

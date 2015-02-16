@@ -14,12 +14,17 @@ body{
 
 .sketch {
 	/*background-color: #f0f0f0;*/
+	cursor: pointer;
 	border: black solid 1px;
 	padding: 9px;
 	margin-left: 5px;
 	margin-right: 5px;
 	margin-bottom: 10px;
 	float: left;
+}
+
+.sketch:hover {
+	border: red solid 1px;
 }
 
 /*.sketch:hover {
@@ -30,6 +35,12 @@ body{
 	position: relative;
 	height: 460px;
 	width: 460px;
+}
+
+.sketch_canvas_fullscreen {
+	position: relative;
+	height: 920px;
+	width: 920px;
 }
 
 .sketch_description {

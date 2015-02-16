@@ -1,6 +1,6 @@
 'use strict';
 
-/* global window */
+/* global window, _ */
 
 (function () {
 
@@ -25,14 +25,14 @@
             var lastx = x1;
             var lasty = y1;
 
-            for (var i = 0; i < steps; i++) {
+            _.range(steps).forEach( i => {
                 var xn = xstep * i + p.randomGaussian() * xgaussFactor;
                 var yn = ystep * i + y1 + p.randomGaussian() * ygaussFactor;
                 // p.line(lastx, lasty, xn, yn);
                 linePoints.push([lastx, lasty, xn, yn]);
                 lastx = xn;
                 lasty = yn;
-            }
+            });
 
             // p.line(lastx, lasty, x2, y2);
             linePoints.push([lastx, lasty, x2, y2]);
@@ -43,9 +43,7 @@
 
         var drawLine = function (points) {
             p.strokeWeight(1);
-            points.forEach(function (line) {
-                p.line.apply(this, line);
-            });
+            points.forEach(line => p.line.apply(this, line));
         };
 
         var drawShape = function (lines1, i) {
@@ -53,7 +51,7 @@
             p.fill(100 + i * 15);
             p.strokeWeight(1);
             p.beginShape();
-            lines1.forEach(function (line) {
+            lines1.forEach(line => {
                 p.vertex(line[0], line[1]);
                 p.vertex(line[2], line[3]);
             });
@@ -76,12 +74,9 @@
 
         var drawStripes = function (lines1) {
 
-            lines1.forEach(function (line1) {
+            lines1.forEach(line1 => {
                 
-                var l1x1 = line1[0];
-                var l1y1 = line1[1];
-                var l1x2 = line1[2];
-                var l1y2 = line1[3];
+                var [l1x1, l1y1, l1x2, l1y2] = line1;
 
                 var l1xrange = l1x2 - l1x1;
                 var l1yrange = l1y2 - l1y1;
@@ -93,7 +88,7 @@
 
                 var fill = Math.max(0, Math.min(110 + strokey * 120, 255));
 
-                p.fill(fill, fill, fill, 50);
+                p.fill(0, 0, 0, 100 / 255 * fill);
                 p.beginShape();
                 p.vertex(l1x1, l1y1);
                 p.vertex(l1x2, l1y2);
@@ -133,7 +128,7 @@
 
             var interpolatedLines = [];
 
-            current.lines.forEach(function (lines) {
+            current.lines.forEach(lines => {
                 
                 if (lines[2] === 200) {
                     

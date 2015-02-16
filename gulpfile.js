@@ -1,6 +1,9 @@
 'use strict';
 
 var gulp = require('gulp');
+var sourcemaps = require('gulp-sourcemaps');
+var babel = require('gulp-babel');
+var concat = require('gulp-concat');
 var $ = require('gulp-load-plugins')();
 
 gulp.task('connect', function () {
@@ -21,13 +24,25 @@ gulp.task('serve', ['connect'], function () {
     require('opn')('http://localhost:9000');
 });
 
-gulp.task('watch', ['connect', 'serve'], function () {
+gulp.task('build', function () {
+    return gulp.src('app/scripts/*.js')
+        .pipe(sourcemaps.init())
+        .pipe(concat('all.js'))
+        .pipe(babel())
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist'));
+});
+
+
+gulp.task('watch', ['build', 'connect', 'serve'], function () {
     var server = $.livereload();
+
+    gulp.watch('app/scripts/*.js', ['build']);
 
     gulp.watch([
         'app/*.html',
         'app/styles/**/*.css',
-        'app/scripts/*.js'
+        'dist/all.js'
     ]).on('change', function (file) {
         server.changed(file.path);
     });
