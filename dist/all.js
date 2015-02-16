@@ -283,7 +283,31 @@ window.addEventListener("load", function () {
         displayName: "sketch",
         render: function () {
             var that = this;
-            return React.createElement("div", { className: "sketch" }, [React.createElement("div", { className: "sketch_description" }, [React.createElement("div", { className: "sketch_description_main" }, that.props.sketch.title), React.createElement("div", { className: "sketch_description_sub" }, that.props.sketch.description)]), React.createElement("div", { className: "sketch_canvas" }, new ReactCanvas({ sketch: that.props.sketch }))]);
+            /* jshint ignore:start */
+            return React.createElement(
+                "div",
+                { className: "sketch" },
+                React.createElement(
+                    "div",
+                    { className: "sketch_description" },
+                    React.createElement(
+                        "div",
+                        { className: "sketch_description_main" },
+                        that.props.sketch.title
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "sketch_description_sub" },
+                        that.props.sketch.description
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: "sketch_canvas" },
+                    React.createElement(ReactCanvas, { sketch: that.props.sketch })
+                )
+            );
+            /* jshint ignore:end */
         }
     }));
 
@@ -299,9 +323,15 @@ window.addEventListener("load", function () {
             var sketchArray = keys.map(function (k) {
                 return sketches[k];
             });
-            return React.createElement("div", { className: "sketches" }, sketchArray.map(function (sketch) {
-                return new Sketch({ sketch: sketch });
-            }));
+            /* jshint ignore:start */
+            return React.createElement(
+                "div",
+                { className: "sketches" },
+                sketchArray.map(function (sketch) {
+                    return new Sketch({ sketch: sketch });
+                })
+            );
+            /* jshint ignore:end */
         }
     }));
 
