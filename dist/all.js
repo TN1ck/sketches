@@ -13,6 +13,9 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
     window.sketches = sketches;
 
     var sketch = function (p) {
+        var width = 940;
+        var height = 240;
+
         var gaussNoiseLine = function (x1, y1, x2, y2) {
             var steps = 10;
             var xrange = Math.abs(x2 - x1);
@@ -59,8 +62,8 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
                 p.vertex(line[0], line[1]);
                 p.vertex(line[2], line[3]);
             });
-            p.vertex(460, 460);
-            p.vertex(0, 460);
+            p.vertex(width, height);
+            p.vertex(0, height);
             p.endShape();
         };
 
@@ -99,8 +102,8 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
                 p.beginShape();
                 p.vertex(l1x1, l1y1);
                 p.vertex(l1x2, l1y2);
-                p.vertex(l1x2, l1y2 + 200);
-                p.vertex(l1x1, l1y1 + 200);
+                p.vertex(l1x2, l1y2 + height);
+                p.vertex(l1x1, l1y1 + height);
                 p.endShape();
 
                 // var steps = length / 5;
@@ -117,12 +120,12 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
         var current = {
             lines: [] };
 
-        var lines = 2 * 5;
+        var lines = height / 50;
         var ystep = 50;
 
         for (var i = 0; i < lines; i++) {
-            var y = 460 / lines * i;
-            current.lines.push([gaussNoiseLine(0, y, 460, y + ystep), gaussNoiseLine(0, y, 460, y + ystep), 0]);
+            var y = height / lines * i;
+            current.lines.push([gaussNoiseLine(0, y, width, y - ystep), gaussNoiseLine(0, y, width, y - ystep), 0]);
         }
         // Override draw function, by default it will be called 60 times per second
         p.draw = function () {
@@ -136,7 +139,7 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
                     var y1old = lines[0][0][1];
                     var y2old = lines[0][lines[0].length - 1][3];
                     // console.log(y1old, y2old, lines, lines[0].length - 1);
-                    lines[1] = gaussNoiseLine(0, y1old, 460, y2old);
+                    lines[1] = gaussNoiseLine(0, y1old, width, y2old);
                     lines[2] = 0;
                 }
 
@@ -153,7 +156,7 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
         };
 
         p.setup = function () {
-            p.size(460, 460);
+            p.size(width, height);
             p.frameRate(10);
             // p.noLoop();
             p.smooth();
@@ -234,8 +237,11 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
             });
         };
 
+        var width = 940;
+        var height = 240;
+
         p.setup = function () {
-            p.size(460, 460);
+            p.size(width, height);
             // p.frameRate(1);
             p.noLoop();
             p.colorMode(p.HSB);
@@ -243,7 +249,7 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
         // Override draw function, by default it will be called 60 times per second
         p.draw = function () {
-            drawGreenFields(0, 0, 460, 460, 0);
+            drawGreenFields(0, 0, width, height, 0);
         };
     };
 
@@ -259,7 +265,7 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 "use strict";
 
-/* global Processing, document, window, React */
+/* global Processing, document, window, React, _ */
 
 window.addEventListener("load", function () {
     var sketches = window.sketches || {};
@@ -279,8 +285,8 @@ window.addEventListener("load", function () {
         }
     }));
 
-    var Sketch = React.createFactory(React.createClass({
-        displayName: "sketch",
+    var SketchLiestView = React.createFactory(React.createClass({
+        displayName: "SketchLiestView",
         render: function () {
             var that = this;
             /* jshint ignore:start */
@@ -311,27 +317,106 @@ window.addEventListener("load", function () {
         }
     }));
 
-    // iterate over all sketches
-    var Sketches = React.createFactory(React.createClass({
-        displayName: "sketches",
+    var SketchFullscreen = React.createClass({
+        displayName: "SketchFullscreen",
+        render: function () {
+            /* jshint ignore:start */
+            var that = this;
+            return React.createElement(
+                "div",
+                { className: "sketch sketch__fullscreen" },
+                React.createElement(
+                    "div",
+                    { className: "sketch_description" },
+                    React.createElement(
+                        "div",
+                        { className: "sketch_description_main" },
+                        that.props.sketch.title
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "sketch_description_sub" },
+                        that.props.sketch.description
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: "sketch_canvas" },
+                    React.createElement(ReactCanvas, { sketch: that.props.sketch })
+                ),
+                React.createElement(
+                    "div",
+                    { className: "sketch_source" },
+                    that.props.sketch.sketch.toString()
+                )
+            );
+            /* jshint ignore:end */
+        }
+    });
+
+    var Sketch = React.createClass({
+        displayName: "Sketch",
+        componentDidMount: function () {
+            this.getDOMNode().addEventListener("click", this.handleClick);
+        },
         getInitialState: function () {
-            return sketches;
+            return this.props.sketch;
+        },
+        handleClick: function () {
+            this.setState({ fullscreen: !this.state.fullscreen });
+        },
+        componentWillUnmount: function () {
+            this.getDOMNode.removeEventListener("click", this.handleClick);
+        },
+        componentDidUpdate: function () {
+            return true;
         },
         render: function () {
-            var that = this;
-            var keys = Object.keys(that.state);
-            var sketchArray = keys.map(function (k) {
-                return sketches[k];
+            /* jshint ignore:start */
+            console.log("render");
+            var sketch = this.state.fullscreen ? React.createElement(SketchFullscreen, { sketch: this.state }) : React.createElement(SketchLiestView, { sketch: this.state });
+            return React.createElement(
+                "div",
+                null,
+                sketch
+            );
+            /* jshint ignore:end */
+        }
+    });
+
+    var SketchList = React.createClass({
+        displayName: "sketchList",
+        render: function () {
+            var sketches = this.props.sketches.map(function (sketch) {
+                return new Sketch({ sketch: sketch });
             });
+
             /* jshint ignore:start */
             return React.createElement(
                 "div",
                 { className: "sketches" },
-                sketchArray.map(function (sketch) {
-                    return new Sketch({ sketch: sketch });
-                })
+                sketches
             );
             /* jshint ignore:end */
+        }
+    });
+
+    // iterate over all sketches
+    var Sketches = React.createFactory(React.createClass({
+        displayName: "sketches",
+        getInitialState: function () {
+            return {
+                sketches: sketches
+            };
+        },
+        render: function () {
+            var that = this;
+            var keys = Object.keys(that.state.sketches);
+            var sketchArray = keys.map(function (k) {
+                return _.extend({ key: k }, that.state.sketches[k]);
+            });
+
+            return new SketchList({ sketches: sketchArray });
         }
     }));
 
@@ -385,16 +470,16 @@ window.addEventListener("load", function () {
         })();
 
         var points = [];
-        var width = 460;
-        var height = 460;
+        var width = 940;
+        var height = 240;
 
         p.setup = function () {
-            p.size(460, 460);
+            p.size(width, height);
             // p.noLoop();
             p.frameRate(30);
             p.smooth();
             p.colorMode(p.HSB);
-            addPoints(10000);
+            addPoints(100);
             p.background(255, 0, 0, 0);
         };
 
@@ -429,13 +514,13 @@ window.addEventListener("load", function () {
 
 "use strict";
 
-/* global window */
+/* global window, _*/
 
 (function () {
     var sketches = window.sketches || {};
     window.sketches = sketches;
 
-    var sketch = function (p) {
+    var sketch = function sketch(p) {
         var degToRad = function (deg) {
             return Math.PI / 360 * deg;
         };
@@ -528,8 +613,11 @@ window.addEventListener("load", function () {
             }
         };
 
+        sketch.width = 940;
+        sketch.height = 240;
+
         p.setup = function () {
-            p.size(460, 460);
+            p.size(sketch.width, sketch.height);
             p.noLoop();
             // p.frameRate(1);
             p.smooth();
@@ -539,7 +627,11 @@ window.addEventListener("load", function () {
         // Override draw function, by default it will be called 60 times per second
         p.draw = function () {
             p.background(255, 0, 0, 0);
-            drawLine(230, 460, -Math.PI / 2, 460 / 4);
+            var seperation = 100;
+            var trees = sketch.width / seperation - 1;
+            _.range(trees).forEach(function (i) {
+                drawLine((i + 1) * seperation + p.random(-20, 20), sketch.height, -Math.PI / 2, sketch.height / 4 + p.random(0, 20));
+            });
         };
     };
 
