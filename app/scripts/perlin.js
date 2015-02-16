@@ -42,16 +42,16 @@
         }
 
         var points = [];
-        var width = 460;
-        var height = 460;
+        var width = 940;
+        var height = 240;
 
         p.setup = function () {
-            p.size(460, 460);
+            p.size(width, height);
             // p.noLoop();
             p.frameRate(30);
             p.smooth();
             p.colorMode(p.HSB);
-            addPoints(10000);
+            addPoints(100);
             p.background(255, 0, 0, 0);
         };
 

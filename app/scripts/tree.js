@@ -1,13 +1,13 @@
 'use strict';
 
-/* global window */
+/* global window, _*/
 
 (function () {
 
     var sketches = window.sketches || {};
     window.sketches = sketches;
 
-    var sketch = function (p) {
+    var sketch = function sketch (p) {
 
         var degToRad = function (deg) {
             return Math.PI / 360 * deg;
@@ -104,8 +104,11 @@
             }
         };
 
+        sketch.width = 940;
+        sketch.height = 240;
+
         p.setup = function () {
-            p.size(460, 460);
+            p.size(sketch.width, sketch.height);
             p.noLoop();
             // p.frameRate(1);
             p.smooth();
@@ -115,7 +118,11 @@
        // Override draw function, by default it will be called 60 times per second
         p.draw = function () {
             p.background(255, 0, 0, 0);
-            drawLine(230, 460, -Math.PI / 2, 460 / 4);
+            var seperation = 100;
+            var trees = (sketch.width / seperation) - 1;
+            _.range(trees).forEach(i => {
+                drawLine((i + 1) * seperation + p.random(-20, 20), sketch.height, -Math.PI / 2, sketch.height / 4 + p.random(0, 20));
+            });
         };
     };
 

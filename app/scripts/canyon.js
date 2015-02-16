@@ -9,6 +9,9 @@
 
     var sketch = function (p) {
 
+        var width = 940;
+        var height = 240;
+
         var gaussNoiseLine = function (x1, y1, x2, y2) {
             
             var steps = 10;
@@ -55,8 +58,8 @@
                 p.vertex(line[0], line[1]);
                 p.vertex(line[2], line[3]);
             });
-            p.vertex(460, 460);
-            p.vertex(0, 460);
+            p.vertex(width, height);
+            p.vertex(0, height);
             p.endShape();
         };
 
@@ -92,8 +95,8 @@
                 p.beginShape();
                 p.vertex(l1x1, l1y1);
                 p.vertex(l1x2, l1y2);
-                p.vertex(l1x2, l1y2 + 200);
-                p.vertex(l1x1, l1y1 + 200);
+                p.vertex(l1x2, l1y2 + height);
+                p.vertex(l1x1, l1y1 + height);
                 p.endShape();
 
                 // var steps = length / 5;
@@ -113,12 +116,12 @@
             lines: [],
         };
 
-        var lines = 2 * 5;
+        var lines = height / 50;
         var ystep = 50;
 
         for (var i = 0; i < lines; i++) {
-            var y = 460 / lines * i;
-            current.lines.push([gaussNoiseLine(0, y, 460, y + ystep), gaussNoiseLine(0, y, 460, y + ystep), 0]);
+            var y = height / lines * i;
+            current.lines.push([gaussNoiseLine(0, y, width, y - ystep), gaussNoiseLine(0, y, width, y - ystep), 0]);
 
         }
         // Override draw function, by default it will be called 60 times per second
@@ -136,7 +139,7 @@
                     var y1old = lines[0][0][1];
                     var y2old = lines[0][lines[0].length - 1][3];
                     // console.log(y1old, y2old, lines, lines[0].length - 1);
-                    lines[1] = gaussNoiseLine(0, y1old, 460, y2old);
+                    lines[1] = gaussNoiseLine(0, y1old, width, y2old);
                     lines[2] = 0;
                 }
                 
@@ -153,7 +156,7 @@
         };
     
         p.setup = function () {
-            p.size(460, 460);
+            p.size(width, height);
             p.frameRate(10);
             // p.noLoop();
             p.smooth();

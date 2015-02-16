@@ -63,8 +63,11 @@
 
         };
 
+        var width = 940;
+        var height = 240;
+
         p.setup = function () {
-            p.size(460, 460);
+            p.size(width, height);
             // p.frameRate(1);
             p.noLoop();
             p.colorMode(p.HSB);
@@ -72,7 +75,7 @@
 
        // Override draw function, by default it will be called 60 times per second
         p.draw = function () {
-            drawGreenFields(0, 0, 460, 460, 0);
+            drawGreenFields(0, 0, width, height, 0);
         };
     };
 
