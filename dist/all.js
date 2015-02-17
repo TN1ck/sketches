@@ -18,7 +18,7 @@ var request = superagent;
 
 window.addEventListener("load", function () {
     var sketches = [canyon, greenFields, tree, perlin];
-    var sketchesPath = "/app/scripts/sketches/";
+    var sketchesPath = "/sketches/app/scripts/sketches/";
 
     var ReactCanvas = React.createClass({
         displayName: "reactCanvas",
@@ -208,7 +208,7 @@ window.addEventListener("load", function () {
 });
 /* jshint ignore:end */
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_398ddd9d.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_90d7289d.js","/")
 },{"./sketches/canyon":2,"./sketches/greenFields":3,"./sketches/perlin":4,"./sketches/tree":5,"buffer":6,"oMfpAn":9}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
