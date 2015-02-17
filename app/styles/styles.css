@@ -43,7 +43,6 @@ body{
 
 .sketch_description {
 	margin-bottom: 10px;
-	height: 100px;
 }
 
 .sketch_description_main {
@@ -73,4 +72,9 @@ h1 {
 	font-size: 4em;
 	font-weight: 200;
 	margin: 0;
+}
+
+h2 {
+	font-size: 2em;
+	font-weight: 300;
 }

@@ -5,6 +5,8 @@ var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
 var concat = require('gulp-concat');
 var $ = require('gulp-load-plugins')();
+var browserify = require('gulp-browserify');
+var babelify = require("babelify");
 
 gulp.task('connect', function () {
     var connect = require('connect');
@@ -25,10 +27,11 @@ gulp.task('serve', ['connect'], function () {
 });
 
 gulp.task('build', function () {
-    return gulp.src('app/scripts/*.js')
+    return gulp.src(['app/scripts/main.js'])
+        .pipe(browserify({insertGlobals: true, transform: babelify}))
         .pipe(sourcemaps.init())
         .pipe(concat('all.js'))
-        .pipe(babel())
+        // .pipe(babel())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist'));
 });
@@ -37,7 +40,7 @@ gulp.task('build', function () {
 gulp.task('watch', ['build', 'connect', 'serve'], function () {
     var server = $.livereload();
 
-    gulp.watch('app/scripts/*.js', ['build']);
+    gulp.watch('app/scripts/**/*.js', ['build']);
 
     gulp.watch([
         'app/*.html',

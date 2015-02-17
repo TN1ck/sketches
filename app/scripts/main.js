@@ -1,13 +1,20 @@
 'use strict';
 
-/* global Processing, document, window, React, _ */
+import * as canyon      from './sketches/canyon';
+import * as greenFields from './sketches/greenFields';
+import * as tree        from './sketches/tree';
+import * as perlin      from './sketches/perlin';
+
+/* global Processing, document, window, React, _, superagent, hljs */
+
+var request = superagent;
 
 window.addEventListener('load', function () {
 
-    var sketches = window.sketches || {};
-    window.sketches = sketches;
+    var sketches = [canyon, greenFields, tree, perlin];
+    var sketchesPath = '/app/scripts/sketches/';
 
-    var ReactCanvas = React.createFactory(React.createClass({
+    var ReactCanvas = React.createClass({
         displayName: 'reactCanvas',
         componentDidMount: function () {
             var el = this.getDOMNode();
@@ -19,9 +26,33 @@ window.addEventListener('load', function () {
         render: function () {
             return React.createElement('canvas', {});
         }
-    }));
+    });
 
-    var SketchLiestView = React.createFactory(React.createClass({
+    var Highlight = React.createClass({
+        displayName: 'Highlight',
+        highlightCode: function () {
+            hljs.highlightBlock(this.getDOMNode().querySelector('code'));
+        },
+        componentDidMount: function() {
+            this.highlightCode();
+        },
+        componentDidUpdate: function () {
+            this.highlightCode();
+        },
+        render: function () {
+            return (
+                /* jshint ignore:start */
+                <pre>
+                    <code className='javascript'>
+                        {this.props.source}
+                    </code>
+                </pre>
+                /* jshint ignore:end */
+            );
+        }
+    });
+
+    var SketchLiestView = React.createClass({
         displayName: 'SketchLiestView',
         render: function () {
             var that = this;
@@ -39,10 +70,19 @@ window.addEventListener('load', function () {
             );
             /* jshint ignore:end */
         }
-    }));
+    });
 
     var SketchFullscreen = React.createClass({
         displayName: 'SketchFullscreen',
+        getInitialState: function() {
+            return this.props.sketch;
+        },
+        componentDidMount: function() {
+            var that = this;
+            request.get(sketchesPath + this.state.key + '.js', function(r) {
+                that.setState({source: r.text})
+            });
+        },
         render: function () {
             /* jshint ignore:start */
             var that = this;
@@ -56,7 +96,8 @@ window.addEventListener('load', function () {
                         <ReactCanvas sketch={that.props.sketch} />
                     </div>
                     <div className='sketch_source'>
-                        {that.props.sketch.sketch.toString()}
+                        <h2>Code</h2>
+                        <Highlight source={that.state.source} />
                     </div>
                 </div>
             );
@@ -83,7 +124,6 @@ window.addEventListener('load', function () {
         },
         render: function() {
             /* jshint ignore:start */
-            console.log('render');
             var sketch = this.state.fullscreen ? <SketchFullscreen sketch={this.state} /> : <SketchLiestView sketch={this.state} />;
             return (
                 <div>
@@ -98,12 +138,9 @@ window.addEventListener('load', function () {
         displayName: 'sketchList',
         render: function() {
 
-            var sketches = this.props.sketches.map(sketch => new Sketch({sketch: sketch}));
-            
             /* jshint ignore:start */
-            return (
-                 <div className="sketches">{sketches}</div>
-            );
+            var sketches = this.props.sketches.map(sketch => <Sketch key={sketch.key} sketch={sketch} />);
+            return <div className="sketches">{sketches}</div>;
             /* jshint ignore:end */
         }
     });
@@ -117,13 +154,9 @@ window.addEventListener('load', function () {
             };
         },
         render: function () {
-            var that = this;
-            var keys = Object.keys(that.state.sketches);
-            var sketchArray = keys.map(k => {
-                return _.extend({key: k}, that.state.sketches[k]);
-            });
-
-            return new SketchList({sketches: sketchArray});
+            /* jshint ignore:start */
+            return <SketchList sketches={sketches} />;
+            /* jshint ignore:end */
         }
     }));
 

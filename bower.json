@@ -5,7 +5,9 @@
     "Processing.js": "~1.4.9",
     "react": "~0.12.2",
     "lodash": "~3.2.0",
-    "dat-gui": "~0.5.1"
+    "dat-gui": "~0.5.1",
+    "superagent": "~0.21.0",
+    "highlightjs": "~8.4.0"
   },
   "devDependencies": {}
 }
