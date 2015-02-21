@@ -8,8 +8,24 @@ export var sketch = function (p) {
         width: 940,
         height: 540,
         framerate: 30,
-        points: 1000,
-        'stroke opacity': 30,
+        points: 3000,
+        stroke: {
+            opacity: 30,
+            color: [100, 100, 255]
+        },
+        velocity: {
+            x: 1,
+            y: 1
+        },
+        restart: function () {
+            points = [];
+            sketch.config.points = 3000;
+            p.setup();
+        },
+        noise: {
+            'x': 0.01,
+            'y': 0.01
+        },
         noloop: false,
         'play/stop': function() {
             sketch.config.noloop = !sketch.config.noloop;
@@ -27,9 +43,24 @@ export var sketch = function (p) {
     // create the gui
     sketch.gui = new dat.GUI({autoPlace: false});
     sketch.gui.add(sketch.config, 'play/stop');
+    sketch.gui.add(sketch.config, 'restart');
     sketch.gui.add(sketch.config, 'add 500 points');
     sketch.gui.add(sketch.config, 'points', 0, 5000).step(1).listen();
-    sketch.gui.add(sketch.config, 'stroke opacity', 0, 255);
+
+    var color = sketch.gui.addFolder('Color');
+    color.add(sketch.config.stroke, 'opacity', 0, 255);
+    color.addColor(sketch.config.stroke, 'color');
+    color.open();
+
+    var velocity = sketch.gui.addFolder('Velocity');
+    velocity.add(sketch.config.velocity, 'x', -5, 5);
+    velocity.add(sketch.config.velocity, 'y', -5, 5);
+    velocity.open();
+
+    var noise = sketch.gui.addFolder('Noise');
+    noise.add(sketch.config.noise, 'x', -0.5, 0.5);
+    noise.add(sketch.config.noise, 'y', -0.5, 0.5);
+    noise.open();
 
 
     class Point {
@@ -46,9 +77,11 @@ export var sketch = function (p) {
 
         update () {
         
-            p.stroke(0, sketch.config['stroke opacity']);
-            this.xv =   Math.cos(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
-            this.yv = - Math.sin(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
+            p.stroke(...sketch.config.stroke.color.concat([sketch.config.stroke.opacity]));
+            this.xv =   Math.cos(p.noise(this.x * sketch.config.noise.x,
+                                         this.y * sketch.config.noise.x) * Math.PI * 2) * sketch.config.velocity.x;
+            this.yv = - Math.sin(p.noise(this.x * sketch.config.noise.y,
+                                         this.y * sketch.config.noise.y) * Math.PI * 2) * sketch.config.velocity.y;
 
             if (this.x > sketch.config.width || this.y > sketch.config.height || this.x < 0 || this.y < 0) {
                 this.finished = true;
@@ -71,7 +104,7 @@ export var sketch = function (p) {
         p.frameRate(sketch.config.framerate);
         // p.noLoop();
         p.smooth();
-        p.colorMode(p.HSB);
+        p.colorMode(p.RGB);
         p.background(255, 0, 0, 0);
     };
 

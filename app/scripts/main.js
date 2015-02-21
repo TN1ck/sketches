@@ -12,8 +12,10 @@ var request = superagent;
 window.addEventListener('load', function () {
 
     var sketches = [perlin, tree, canyon, greenFields];
-    var sketchesPath = '/sketches/app/scripts/sketches/';
-    var imagePath = '/sketches/images/sketches/';
+    
+    var rootPath = '/sketches';
+    var sketchesPath = rootPath + '/app/scripts/sketches/';
+    var imagePath = rootPath + '/images/sketches/';
 
     var ReactCanvas = React.createClass({
         displayName: 'reactCanvas',

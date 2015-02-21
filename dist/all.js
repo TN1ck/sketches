@@ -18,8 +18,10 @@ var request = superagent;
 
 window.addEventListener("load", function () {
     var sketches = [perlin, tree, canyon, greenFields];
-    var sketchesPath = "/sketches/app/scripts/sketches/";
-    var imagePath = "/sketches/images/sketches/";
+
+    var rootPath = "/sketches";
+    var sketchesPath = rootPath + "/app/scripts/sketches/";
+    var imagePath = rootPath + "/images/sketches/";
 
     var ReactCanvas = React.createClass({
         displayName: "reactCanvas",
@@ -191,7 +193,7 @@ window.addEventListener("load", function () {
 });
 /* jshint ignore:end */
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4efaf782.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_7fdb1b26.js","/")
 },{"./sketches/canyon":2,"./sketches/greenFields":3,"./sketches/perlin":4,"./sketches/tree":5,"buffer":6,"oMfpAn":9}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -502,6 +504,8 @@ Object.defineProperty(exports, "__esModule", {
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
+var _toConsumableArray = function (arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } };
+
 var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
@@ -513,8 +517,24 @@ var sketch = exports.sketch = function (p) {
         width: 940,
         height: 540,
         framerate: 30,
-        points: 1000,
-        "stroke opacity": 30,
+        points: 3000,
+        stroke: {
+            opacity: 30,
+            color: [100, 100, 255]
+        },
+        velocity: {
+            x: 1,
+            y: 1
+        },
+        restart: function () {
+            points = [];
+            sketch.config.points = 3000;
+            p.setup();
+        },
+        noise: {
+            x: 0.01,
+            y: 0.01
+        },
         noloop: false,
         "play/stop": function () {
             sketch.config.noloop = !sketch.config.noloop;
@@ -532,9 +552,24 @@ var sketch = exports.sketch = function (p) {
     // create the gui
     sketch.gui = new dat.GUI({ autoPlace: false });
     sketch.gui.add(sketch.config, "play/stop");
+    sketch.gui.add(sketch.config, "restart");
     sketch.gui.add(sketch.config, "add 500 points");
     sketch.gui.add(sketch.config, "points", 0, 5000).step(1).listen();
-    sketch.gui.add(sketch.config, "stroke opacity", 0, 255);
+
+    var color = sketch.gui.addFolder("Color");
+    color.add(sketch.config.stroke, "opacity", 0, 255);
+    color.addColor(sketch.config.stroke, "color");
+    color.open();
+
+    var velocity = sketch.gui.addFolder("Velocity");
+    velocity.add(sketch.config.velocity, "x", -5, 5);
+    velocity.add(sketch.config.velocity, "y", -5, 5);
+    velocity.open();
+
+    var noise = sketch.gui.addFolder("Noise");
+    noise.add(sketch.config.noise, "x", -0.5, 0.5);
+    noise.add(sketch.config.noise, "y", -0.5, 0.5);
+    noise.open();
 
 
     var Point = (function () {
@@ -551,9 +586,9 @@ var sketch = exports.sketch = function (p) {
         _prototypeProperties(Point, null, {
             update: {
                 value: function update() {
-                    p.stroke(0, sketch.config["stroke opacity"]);
-                    this.xv = Math.cos(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
-                    this.yv = -Math.sin(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
+                    p.stroke.apply(p, _toConsumableArray(sketch.config.stroke.color.concat([sketch.config.stroke.opacity])));
+                    this.xv = Math.cos(p.noise(this.x * sketch.config.noise.x, this.y * sketch.config.noise.x) * Math.PI * 2) * sketch.config.velocity.x;
+                    this.yv = -Math.sin(p.noise(this.x * sketch.config.noise.y, this.y * sketch.config.noise.y) * Math.PI * 2) * sketch.config.velocity.y;
 
                     if (this.x > sketch.config.width || this.y > sketch.config.height || this.x < 0 || this.y < 0) {
                         this.finished = true;
@@ -581,7 +616,7 @@ var sketch = exports.sketch = function (p) {
         p.frameRate(sketch.config.framerate);
         // p.noLoop();
         p.smooth();
-        p.colorMode(p.HSB);
+        p.colorMode(p.RGB);
         p.background(255, 0, 0, 0);
     };
 
