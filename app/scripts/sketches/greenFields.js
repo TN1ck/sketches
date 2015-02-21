@@ -4,6 +4,25 @@
 
 export var sketch = function (p) {
 
+    sketch.config = {
+        width: 940,
+        height: 540,
+        framerate: 2,
+        noloop: true,
+        'play/stop': function() {
+            sketch.config.noloop = !sketch.config.noloop;
+            if (sketch.config.noloop) {
+                p.noLoop();
+            } else {
+                p.loop();
+            }
+        },
+    };
+
+    // create the gui
+    sketch.gui = new dat.GUI({autoPlace: false});
+    sketch.gui.add(sketch.config, 'play/stop');
+
     var drawGreenRectangle = function (x1, y1, x2, y2) {
         p.fill(p.random(50, 100), p.random(100, 255), p.random(180, 220));
         p.stroke(180);
@@ -58,22 +77,20 @@ export var sketch = function (p) {
 
     };
 
-    var width = 940;
-    var height = 240;
-
     p.setup = function () {
-        p.size(width, height);
-        // p.frameRate(1);
+        p.size(sketch.config.width, sketch.config.height);
+        p.frameRate(sketch.config.framerate);
         p.noLoop();
         p.colorMode(p.HSB);
     };
 
    // Override draw function, by default it will be called 60 times per second
     p.draw = function () {
-        drawGreenFields(0, 0, width, height, 0);
+        drawGreenFields(0, 0, sketch.config.width, sketch.config.height, 0);
     };
 };
 
 export var title = 'Green Fields';
 export var description = 'Inspired by the great plains in the USA, this sketch tries to simulate fields.';
+export var image = 'greenFields.png'
 export var key = 'greenFields';

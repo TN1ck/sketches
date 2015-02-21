@@ -17,20 +17,38 @@ var perlin = _interopRequireWildcard(require("./sketches/perlin"));
 var request = superagent;
 
 window.addEventListener("load", function () {
-    var sketches = [canyon, greenFields, tree, perlin];
+    var sketches = [perlin, tree, canyon, greenFields];
     var sketchesPath = "/sketches/app/scripts/sketches/";
+    var imagePath = "/sketches/images/sketches/";
 
     var ReactCanvas = React.createClass({
         displayName: "reactCanvas",
+        getInitialState: function () {
+            return { instance: false };
+        },
         componentDidMount: function () {
             var el = this.getDOMNode();
-            var processingInstance = new Processing(el, this.props.sketch.sketch);
+            var canvas = el.querySelector("canvas");
+            var gui = el.querySelector(".gui");
+            this.state.instance = new Processing(canvas, this.props.sketch.sketch);
+            gui.appendChild(this.props.sketch.sketch.gui.domElement);
+        },
+        omponentWillUnmount: function () {
+            this.props.sketch.sketch.gui.destroy();
+            this.state.instance.exit();
+            delete this.state.instance;
+            return true;
         },
         componentWillUnmount: function () {
             return true;
         },
         render: function () {
-            return React.createElement("canvas", {});
+            return React.createElement(
+                "div",
+                null,
+                React.createElement("canvas", null),
+                React.createElement("div", { className: "gui" })
+            );
         }
     });
 
@@ -61,75 +79,39 @@ window.addEventListener("load", function () {
         }
     });
 
-    var SketchLiestView = React.createClass({
-        displayName: "SketchLiestView",
-        render: function () {
-            var that = this;
-            /* jshint ignore:start */
-            return React.createElement(
-                "div",
-                { className: "sketch" },
-                React.createElement(
-                    "div",
-                    { className: "sketch_description" },
-                    React.createElement(
-                        "div",
-                        { className: "sketch_description_main" },
-                        that.props.sketch.title
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "sketch_description_sub" },
-                        that.props.sketch.description
-                    )
-                ),
-                React.createElement(
-                    "div",
-                    { className: "sketch_canvas" },
-                    React.createElement(ReactCanvas, { sketch: that.props.sketch })
-                )
-            );
-            /* jshint ignore:end */
-        }
-    });
 
-    var SketchFullscreen = React.createClass({
-        displayName: "SketchFullscreen",
+    var Sketch = React.createClass({
+        displayName: "Sketch",
         getInitialState: function () {
             return this.props.sketch;
         },
+        handleClick: function () {
+            this.setState({ fullscreen: !this.state.fullscreen });
+        },
+        componentWillUnmount: function () {
+            var el = this.getDOMNode().querySelector(".sketch_description_button");
+            el.removeEventListener("click", this.handleClick);
+        },
         componentDidMount: function () {
+            var el = this.getDOMNode().querySelector(".sketch_description_button");
+            el.addEventListener("click", this.handleClick);
             var that = this;
             request.get(sketchesPath + this.state.key + ".js", function (r) {
                 that.setState({ source: r.text });
             });
         },
+        componentDidUpdate: function () {
+            return true;
+        },
         render: function () {
-            /* jshint ignore:start */
             var that = this;
-            return React.createElement(
-                "div",
-                { className: "sketch sketch__fullscreen" },
-                React.createElement(
-                    "div",
-                    { className: "sketch_description" },
-                    React.createElement(
-                        "div",
-                        { className: "sketch_description_main" },
-                        that.props.sketch.title
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "sketch_description_sub" },
-                        that.props.sketch.description
-                    )
-                ),
-                React.createElement(
-                    "div",
-                    { className: "sketch_canvas" },
-                    React.createElement(ReactCanvas, { sketch: that.props.sketch })
-                ),
-                React.createElement(
+            /* jshint ignore:start */
+            var canvas = React.createElement("img", { src: imagePath + that.props.sketch.image });
+            var moreInfo = React.createElement("div", null);
+
+            if (this.state.fullscreen) {
+                canvas = React.createElement(ReactCanvas, { sketch: that.props.sketch });
+                moreInfo = React.createElement(
                     "div",
                     { className: "sketch_source" },
                     React.createElement(
@@ -138,36 +120,37 @@ window.addEventListener("load", function () {
                         "Code"
                     ),
                     React.createElement(Highlight, { source: that.state.source })
-                )
-            );
-            /* jshint ignore:end */
-        }
-    });
+                );
+            }
 
-    var Sketch = React.createClass({
-        displayName: "Sketch",
-        componentDidMount: function () {
-            this.getDOMNode().addEventListener("click", this.handleClick);
-        },
-        getInitialState: function () {
-            return this.props.sketch;
-        },
-        handleClick: function () {
-            this.setState({ fullscreen: !this.state.fullscreen });
-        },
-        componentWillUnmount: function () {
-            this.getDOMNode.removeEventListener("click", this.handleClick);
-        },
-        componentDidUpdate: function () {
-            return true;
-        },
-        render: function () {
-            /* jshint ignore:start */
-            var sketch = this.state.fullscreen ? React.createElement(SketchFullscreen, { sketch: this.state }) : React.createElement(SketchLiestView, { sketch: this.state });
             return React.createElement(
                 "div",
-                null,
-                sketch
+                { className: this.state.fullscreen ? "sketch sketch__fullscreen" : "sketch" },
+                React.createElement(
+                    "div",
+                    { className: "sketch_description" },
+                    React.createElement(
+                        "div",
+                        { className: "sketch_description_main" },
+                        that.props.sketch.title
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "sketch_description_sub" },
+                        that.props.sketch.description
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "sketch_description_button" },
+                        this.state.fullscreen ? "close" : "open"
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: "sketch_canvas" },
+                    canvas
+                ),
+                moreInfo
             );
             /* jshint ignore:end */
         }
@@ -208,29 +191,52 @@ window.addEventListener("load", function () {
 });
 /* jshint ignore:end */
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_90d7289d.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4efaf782.js","/")
 },{"./sketches/canyon":2,"./sketches/greenFields":3,"./sketches/perlin":4,"./sketches/tree":5,"buffer":6,"oMfpAn":9}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
 var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; for (var _iterator = arr[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) { _arr.push(_step.value); if (i && _arr.length === i) break; } return _arr; } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } };
 
-/* global window, _ */
+/* global window, _, gui */
 
-var sketch = exports.sketch = function (p) {
-    var width = 940;
-    var height = 240;
+var sketch = exports.sketch = function sketch(p) {
+    sketch.config = {
+        width: 940,
+        height: 540,
+        framerate: 30,
+        noloop: false,
+        "play/stop": function () {
+            sketch.config.noloop = !sketch.config.noloop;
+            if (sketch.config.noloop) {
+                p.noLoop();
+            } else {
+                p.loop();
+            }
+        },
+        gaussFactorX: 20,
+        gaussFactorY: 10,
+        lineSteps: 10,
+        lineSeperator: 50,
+        animation: 200
+    };
+
+    // create the gui
+
+    sketch.gui = new dat.GUI({ autoPlace: false });
+
+    sketch.gui.add(sketch.config, "play/stop");
+    sketch.gui.add(sketch.config, "animation", 50, 400);
 
     var gaussNoiseLine = function (x1, y1, x2, y2) {
-        var steps = 10;
+        var steps = sketch.config.lineSteps;
+        var xgaussFactor = sketch.config.gaussFactorX;
+        var ygaussFactor = sketch.config.gaussFactorY;
+
         var xrange = Math.abs(x2 - x1);
         var yrange = y2 - y1;
         var xstep = xrange / steps;
         var ystep = yrange / steps;
-
-        var xgaussFactor = 20;
-        var ygaussFactor = 10;
-
         var linePoints = [];
 
         var lastx = x1;
@@ -267,17 +273,25 @@ var sketch = exports.sketch = function (p) {
         p.fill(100 + i * 15);
         p.strokeWeight(1);
         p.beginShape();
+
         lines1.forEach(function (line) {
-            p.vertex(line[0], line[1]);
-            p.vertex(line[2], line[3]);
+            var _line = _slicedToArray(line, 4);
+
+            var x1 = _line[0];
+            var y1 = _line[1];
+            var x2 = _line[2];
+            var y2 = _line[3];
+            p.vertex(x1, y1);
+            p.vertex(x2, y2);
         });
-        p.vertex(width, height);
-        p.vertex(0, height);
+
+        p.vertex(sketch.config.width, sketch.config.height);
+        p.vertex(0, sketch.config.height);
         p.endShape();
     };
 
     var interpolateBetweenLines = function (lines1, lines2, step) {
-        var steps = 200;
+        var steps = sketch.config.animation;
         return lines1.map(function (line1, i) {
             var line2 = lines2[i];
             return line1.map(function (pt1, ii) {
@@ -287,21 +301,21 @@ var sketch = exports.sketch = function (p) {
         });
     };
 
-    var drawStripes = function (lines1) {
-        lines1.forEach(function (line1) {
-            var _line1 = _slicedToArray(line1, 4);
+    var drawStripes = function (lines) {
+        lines.forEach(function (line) {
+            var _line = _slicedToArray(line, 4);
 
-            var l1x1 = _line1[0];
-            var l1y1 = _line1[1];
-            var l1x2 = _line1[2];
-            var l1y2 = _line1[3];
+            var x1 = _line[0];
+            var y1 = _line[1];
+            var x2 = _line[2];
+            var y2 = _line[3];
 
 
-            var l1xrange = l1x2 - l1x1;
-            var l1yrange = l1y2 - l1y1;
+            var xrange = x2 - x1;
+            var yrange = y2 - y1;
 
-            var length = Math.sqrt(Math.pow(l1xrange, 2) + Math.pow(l1yrange, 2));
-            var strokey = l1yrange / length;
+            var length = Math.sqrt(Math.pow(xrange, 2) + Math.pow(yrange, 2));
+            var strokey = yrange / length;
 
             p.strokeCap(p.SQUARE);
 
@@ -309,46 +323,48 @@ var sketch = exports.sketch = function (p) {
 
             p.fill(0, 0, 0, 100 / 255 * fill);
             p.beginShape();
-            p.vertex(l1x1, l1y1);
-            p.vertex(l1x2, l1y2);
-            p.vertex(l1x2, l1y2 + height);
-            p.vertex(l1x1, l1y1 + height);
+            p.vertex(x1, y1);
+            p.vertex(x2, y2);
+            p.vertex(x2, y2 + sketch.config.height);
+            p.vertex(x1, y1 + sketch.config.height);
             p.endShape();
 
             // var steps = length / 5;
             // var steps = 10;
             // console.log(steps);
             // for (var j = 0; j < steps; j++) {
-            //     var xn = l1x1 + l1xrange / steps * j;
-            //     var yn = l1y1 + l1yrange / steps * j;
+            //     var xn = x1 + xrange / steps * j;
+            //     var yn = y1 + yrange / steps * j;
             //     p.line(xn, yn, xn, yn + 200);
             // }
         });
     };
 
-    var current = {
-        lines: [] };
+    sketch.state = {
+        lines: []
+    };
 
-    var lines = height / 50;
-    var ystep = 50;
+    var lines = sketch.config.height / sketch.config.lineSeperator;
+    var ystep = sketch.config.lineSeperator;
 
     for (var i = 0; i < lines; i++) {
-        var y = height / lines * i;
-        current.lines.push([gaussNoiseLine(0, y, width, y - ystep), gaussNoiseLine(0, y, width, y - ystep), 0]);
+        var y = sketch.config.height / lines * i;
+        var args = [0, y, sketch.config.width, y - ystep];
+        sketch.state.lines.push([gaussNoiseLine.apply(undefined, args), gaussNoiseLine.apply(undefined, args), 0]);
     }
-    // Override draw function, by default it will be called 60 times per second
+
     p.draw = function () {
         p.background(80);
 
         var interpolatedLines = [];
 
-        current.lines.forEach(function (lines) {
-            if (lines[2] === 200) {
+        sketch.state.lines.forEach(function (lines) {
+            // animation is done, create a new line
+            if (lines[2] >= sketch.config.animation) {
                 lines[0] = lines[1];
                 var y1old = lines[0][0][1];
                 var y2old = lines[0][lines[0].length - 1][3];
-                // console.log(y1old, y2old, lines, lines[0].length - 1);
-                lines[1] = gaussNoiseLine(0, y1old, width, y2old);
+                lines[1] = gaussNoiseLine(0, y1old, sketch.config.width, y2old);
                 lines[2] = 0;
             }
 
@@ -365,9 +381,9 @@ var sketch = exports.sketch = function (p) {
     };
 
     p.setup = function () {
-        p.size(width, height);
-        p.frameRate(10);
-        p.noLoop();
+        p.size(sketch.config.width, sketch.config.height);
+        p.frameRate(sketch.config.framerate);
+        // p.noLoop(sketch.config.noloop);
         p.smooth();
         p.colorMode(p.RGB);
     };
@@ -375,6 +391,7 @@ var sketch = exports.sketch = function (p) {
 
 var title = exports.title = "Canyon";
 var description = exports.description = "An attempt to create a canyion-like visualisation.\n                          The color is set according to the slope to create a light-impression.";
+var image = exports.image = "canyon.png";
 var key = exports.key = "canyon";
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -388,6 +405,24 @@ Object.defineProperty(exports, "__esModule", {
 /* global window */
 
 var sketch = exports.sketch = function (p) {
+    sketch.config = {
+        width: 940,
+        height: 540,
+        framerate: 2,
+        noloop: true,
+        "play/stop": function () {
+            sketch.config.noloop = !sketch.config.noloop;
+            if (sketch.config.noloop) {
+                p.noLoop();
+            } else {
+                p.loop();
+            }
+        } };
+
+    // create the gui
+    sketch.gui = new dat.GUI({ autoPlace: false });
+    sketch.gui.add(sketch.config, "play/stop");
+
     var drawGreenRectangle = function (x1, y1, x2, y2) {
         p.fill(p.random(50, 100), p.random(100, 255), p.random(180, 220));
         p.stroke(180);
@@ -441,24 +476,22 @@ var sketch = exports.sketch = function (p) {
         });
     };
 
-    var width = 940;
-    var height = 240;
-
     p.setup = function () {
-        p.size(width, height);
-        // p.frameRate(1);
+        p.size(sketch.config.width, sketch.config.height);
+        p.frameRate(sketch.config.framerate);
         p.noLoop();
         p.colorMode(p.HSB);
     };
 
     // Override draw function, by default it will be called 60 times per second
     p.draw = function () {
-        drawGreenFields(0, 0, width, height, 0);
+        drawGreenFields(0, 0, sketch.config.width, sketch.config.height, 0);
     };
 };
 
 var title = exports.title = "Green Fields";
 var description = exports.description = "Inspired by the great plains in the USA, this sketch tries to simulate fields.";
+var image = exports.image = "greenFields.png";
 var key = exports.key = "greenFields";
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -476,6 +509,34 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 /* global window, _ */
 
 var sketch = exports.sketch = function (p) {
+    sketch.config = {
+        width: 940,
+        height: 540,
+        framerate: 30,
+        points: 1000,
+        "stroke opacity": 30,
+        noloop: false,
+        "play/stop": function () {
+            sketch.config.noloop = !sketch.config.noloop;
+            if (sketch.config.noloop) {
+                p.noLoop();
+            } else {
+                p.loop();
+            }
+        },
+        "add 500 points": function () {
+            sketch.config.points += 500;
+        }
+    };
+
+    // create the gui
+    sketch.gui = new dat.GUI({ autoPlace: false });
+    sketch.gui.add(sketch.config, "play/stop");
+    sketch.gui.add(sketch.config, "add 500 points");
+    sketch.gui.add(sketch.config, "points", 0, 5000).step(1).listen();
+    sketch.gui.add(sketch.config, "stroke opacity", 0, 255);
+
+
     var Point = (function () {
         function Point(x, y) {
             _classCallCheck(this, Point);
@@ -490,11 +551,11 @@ var sketch = exports.sketch = function (p) {
         _prototypeProperties(Point, null, {
             update: {
                 value: function update() {
-                    p.stroke(0, 16);
+                    p.stroke(0, sketch.config["stroke opacity"]);
                     this.xv = Math.cos(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
                     this.yv = -Math.sin(p.noise(this.x * 0.01, this.y * 0.01) * Math.PI * 2);
 
-                    if (this.x > width || this.y > height || this.x < 0 || this.y < 0) {
+                    if (this.x > sketch.config.width || this.y > sketch.config.height || this.x < 0 || this.y < 0) {
                         this.finished = true;
                     }
 
@@ -514,31 +575,35 @@ var sketch = exports.sketch = function (p) {
     })();
 
     var points = [];
-    var width = 940;
-    var height = 240;
 
     p.setup = function () {
-        p.size(width, height);
-        p.frameRate(30);
-        p.noLoop();
+        p.size(sketch.config.width, sketch.config.height);
+        p.frameRate(sketch.config.framerate);
+        // p.noLoop();
         p.smooth();
         p.colorMode(p.HSB);
-        addPoints(100);
         p.background(255, 0, 0, 0);
     };
 
     var addPoints = function (n) {
         _.times(n, function () {
-            var x = p.random(0, width);
-            var y = p.random(0, height);
+            var x = p.random(0, sketch.config.width);
+            var y = p.random(0, sketch.config.height);
             points.push(new Point(x, y));
         });
     };
 
-
     p.draw = function () {
-        points = points.filter(function (point) {
-            return !point.finished;
+        // add new points when necessary
+        addPoints(sketch.config.points - points.length);
+
+        points = points.filter(function (point, i) {
+            var finished = point.finished;
+            if (finished) {
+                sketch.config.points--;
+                delete points[i];
+            }
+            return !finished;
         });
         points.forEach(function (point) {
             return point.update();
@@ -548,6 +613,7 @@ var sketch = exports.sketch = function (p) {
 
 var title = exports.title = "Perlin";
 var description = exports.description = "Perlin Noise.";
+var image = exports.image = "perlin.png";
 var key = exports.key = "perlin";
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -559,6 +625,26 @@ Object.defineProperty(exports, "__esModule", {
 "use strict";
 
 var sketch = exports.sketch = function sketch(p) {
+    sketch.config = {
+        width: 940,
+        height: 540,
+        framerate: 1,
+        depth: 8,
+        trees: 4,
+        noloop: true,
+        "play/stop": function () {
+            sketch.config.noloop = !sketch.config.noloop;
+            if (sketch.config.noloop) {
+                p.noLoop();
+            } else {
+                p.loop();
+            }
+        } };
+
+    // create the gui
+    sketch.gui = new dat.GUI({ autoPlace: false });
+    sketch.gui.add(sketch.config, "play/stop");
+
     var degToRad = function (deg) {
         return Math.PI / 360 * deg;
     };
@@ -593,7 +679,13 @@ var sketch = exports.sketch = function sketch(p) {
         p.quad.apply(this, cs);
     };
 
-    var drawLine = function (x, y, radian, length) {
+    var drawLine = function (x, y, radian, length, depth) {
+        depth--;
+
+        if (depth < 0) {
+            return;
+        }
+
         var threshold = 5;
         var branches = p.random(2, 5);
         // var branches = 1;
@@ -647,17 +739,14 @@ var sketch = exports.sketch = function sketch(p) {
                 yNN = yN;
             }
 
-            drawLine(xNN, yNN, rNN, length / 1.5);
+            drawLine(xNN, yNN, rNN, length / 1.5, depth);
         }
     };
 
-    sketch.width = 940;
-    sketch.height = 240;
-
     p.setup = function () {
-        p.size(sketch.width, sketch.height);
+        p.size(sketch.config.width, sketch.config.height);
         p.noLoop();
-        // p.frameRate(1);
+        p.frameRate(sketch.config.framerate);
         p.smooth();
         p.colorMode(p.HSB);
     };
@@ -665,22 +754,24 @@ var sketch = exports.sketch = function sketch(p) {
     // Override draw function, by default it will be called 60 times per second
     p.draw = function () {
         p.background(255, 0, 0, 0);
-        var seperation = 100;
-        var trees = Math.floor(sketch.width / seperation - 1);
+
+        var trees = sketch.config.trees;
+        var seperation = sketch.config.width / (trees + 1);
 
         _.times(trees, function (i) {
             var x = (i + 1) * seperation + p.random(-20, 20);
-            var y = sketch.height;
+            var y = sketch.config.height;
             var rad = -Math.PI / 2;
-            var branchSize = sketch.height / 4 + p.random(0, 20);
+            var branchSize = sketch.config.height / 4 + p.random(0, 20);
 
-            drawLine(x, y, rad, branchSize);
+            drawLine(x, y, rad, branchSize, sketch.config.depth);
         });
     };
 };
 
 var title = exports.title = "Tree";
 var description = exports.description = "A simple tree with sophisticated branching.";
+var image = exports.image = "tree.png";
 var key = exports.key = "tree";
 Object.defineProperty(exports, "__esModule", {
     value: true

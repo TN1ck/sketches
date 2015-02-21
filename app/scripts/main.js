@@ -11,20 +11,36 @@ var request = superagent;
 
 window.addEventListener('load', function () {
 
-    var sketches = [canyon, greenFields, tree, perlin];
+    var sketches = [perlin, tree, canyon, greenFields];
     var sketchesPath = '/sketches/app/scripts/sketches/';
+    var imagePath = '/sketches/images/sketches/';
 
     var ReactCanvas = React.createClass({
         displayName: 'reactCanvas',
+        getInitialState: function() {
+            return {instance: false};
+        },
         componentDidMount: function () {
             var el = this.getDOMNode();
-            var processingInstance = new Processing(el, this.props.sketch.sketch);
+            var canvas = el.querySelector('canvas');
+            var gui = el.querySelector('.gui');
+            this.state.instance = new Processing(canvas, this.props.sketch.sketch);
+            gui.appendChild(this.props.sketch.sketch.gui.domElement);
+        },
+        omponentWillUnmount: function () {
+            this.props.sketch.sketch.gui.destroy();
+            this.state.instance.exit();
+            delete this.state.instance;
+            return true;
         },
         componentWillUnmount: function () {
             return true;
         },
         render: function () {
-            return React.createElement('canvas', {});
+            return <div>
+                <canvas></canvas>
+                <div className={'gui'}></div>
+            </div>
         }
     });
 
@@ -52,64 +68,9 @@ window.addEventListener('load', function () {
         }
     });
 
-    var SketchLiestView = React.createClass({
-        displayName: 'SketchLiestView',
-        render: function () {
-            var that = this;
-            /* jshint ignore:start */
-            return (
-                <div className='sketch'>
-                    <div className='sketch_description'>
-                        <div className='sketch_description_main'>{that.props.sketch.title}</div>
-                        <div className='sketch_description_sub'>{that.props.sketch.description}</div>
-                    </div>
-                    <div className='sketch_canvas'>
-                        <ReactCanvas sketch={that.props.sketch} />
-                    </div>
-                </div>
-            );
-            /* jshint ignore:end */
-        }
-    });
-
-    var SketchFullscreen = React.createClass({
-        displayName: 'SketchFullscreen',
-        getInitialState: function() {
-            return this.props.sketch;
-        },
-        componentDidMount: function() {
-            var that = this;
-            request.get(sketchesPath + this.state.key + '.js', function(r) {
-                that.setState({source: r.text})
-            });
-        },
-        render: function () {
-            /* jshint ignore:start */
-            var that = this;
-            return (
-                <div className='sketch sketch__fullscreen'>
-                    <div className='sketch_description'>
-                        <div className='sketch_description_main'>{that.props.sketch.title}</div>
-                        <div className='sketch_description_sub'>{that.props.sketch.description}</div>
-                    </div>
-                    <div className='sketch_canvas'>
-                        <ReactCanvas sketch={that.props.sketch} />
-                    </div>
-                    <div className='sketch_source'>
-                        <h2>Code</h2>
-                        <Highlight source={that.state.source} />
-                    </div>
-                </div>
-            );
-            /* jshint ignore:end */
-        }
-    });
 
     var Sketch = React.createClass({
         displayName: 'Sketch',
-            componentDidMount: function () {
-            this.getDOMNode().addEventListener('click', this.handleClick);
-        },
         getInitialState: function() {
             return this.props.sketch;
         },
@@ -117,17 +78,46 @@ window.addEventListener('load', function () {
             this.setState({fullscreen: !this.state.fullscreen});
         },
         componentWillUnmount: function() {
-            this.getDOMNode.removeEventListener('click', this.handleClick);
+            var el = this.getDOMNode().querySelector('.sketch_description_button');
+            el.removeEventListener('click', this.handleClick);
+        },
+        componentDidMount: function() {
+            var el = this.getDOMNode().querySelector('.sketch_description_button');
+            el.addEventListener('click', this.handleClick);
+            var that = this;
+            request.get(sketchesPath + this.state.key + '.js', function(r) {
+                that.setState({source: r.text})
+            });
         },
         componentDidUpdate: function() {
             return true;
         },
         render: function() {
+
+            var that = this;
             /* jshint ignore:start */
-            var sketch = this.state.fullscreen ? <SketchFullscreen sketch={this.state} /> : <SketchLiestView sketch={this.state} />;
+            var canvas = <img src={imagePath + that.props.sketch.image} />;
+            var moreInfo = <div></div>;
+
+            if (this.state.fullscreen) {
+                canvas = <ReactCanvas sketch={that.props.sketch} />; 
+                moreInfo = <div className='sketch_source'>
+                    <h2>Code</h2>
+                    <Highlight source={that.state.source} />
+                </div>;
+            }
+                    
             return (
-                <div>
-                     {sketch}
+                <div className={this.state.fullscreen ? 'sketch sketch__fullscreen' : 'sketch'}>
+                    <div className='sketch_description'>
+                        <div className='sketch_description_main'>{that.props.sketch.title}</div>
+                        <div className='sketch_description_sub'>{that.props.sketch.description}</div>
+                        <div className='sketch_description_button'>{this.state.fullscreen ? 'close' : 'open'}</div>
+                    </div>
+                    <div className='sketch_canvas'>
+                         {canvas}
+                    </div>
+                    {moreInfo}
                 </div>
             );
             /* jshint ignore:end */

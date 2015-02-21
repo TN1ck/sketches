@@ -2,6 +2,27 @@
 
 export var sketch = function sketch (p) {
 
+    sketch.config = {
+        width: 940,
+        height: 540,
+        framerate: 1,
+        depth: 8,
+        trees: 4,
+        noloop: true,
+        'play/stop': function() {
+            sketch.config.noloop = !sketch.config.noloop;
+            if (sketch.config.noloop) {
+                p.noLoop();
+            } else {
+                p.loop();
+            }
+        },
+    };
+
+    // create the gui
+    sketch.gui = new dat.GUI({autoPlace: false});
+    sketch.gui.add(sketch.config, 'play/stop');
+
     var degToRad = function (deg) {
         return Math.PI / 360 * deg;
     };
@@ -37,7 +58,13 @@ export var sketch = function sketch (p) {
         p.quad.apply(this, cs);
     };
 
-    var drawLine = function (x, y, radian, length) {
+    var drawLine = function (x, y, radian, length, depth) {
+
+        depth--;
+
+        if (depth < 0) {
+            return;
+        }
 
         var threshold = 5;
         var branches = p.random(2, 5);
@@ -93,17 +120,14 @@ export var sketch = function sketch (p) {
                 yNN = yN;
             }
 
-            drawLine(xNN, yNN, rNN, length / 1.5);
+            drawLine(xNN, yNN, rNN, length / 1.5, depth);
         }
     };
 
-    sketch.width = 940;
-    sketch.height = 240;
-
     p.setup = function () {
-        p.size(sketch.width, sketch.height);
+        p.size(sketch.config.width, sketch.config.height);
         p.noLoop();
-        // p.frameRate(1);
+        p.frameRate(sketch.config.framerate);
         p.smooth();
         p.colorMode(p.HSB);
     };
@@ -112,17 +136,18 @@ export var sketch = function sketch (p) {
     p.draw = function () {
         
         p.background(255, 0, 0, 0);
-        var seperation = 100;
-        var trees = Math.floor((sketch.width / seperation) - 1);
+        
+        var trees = sketch.config.trees;
+        var seperation = sketch.config.width / (trees + 1);
         
         _.times(trees, i => {
             
             var x = (i + 1) * seperation + p.random(-20, 20);
-            var y = sketch.height;
+            var y = sketch.config.height;
             var rad = -Math.PI / 2;
-            var branchSize = sketch.height / 4 + p.random(0, 20);
+            var branchSize = sketch.config.height / 4 + p.random(0, 20);
             
-            drawLine(x, y, rad, branchSize);
+            drawLine(x, y, rad, branchSize, sketch.config.depth);
 
         });
     };
@@ -130,4 +155,5 @@ export var sketch = function sketch (p) {
 
 export var title = 'Tree';
 export var description = 'A simple tree with sophisticated branching.';
+export var image = 'tree.png';
 export var key = 'tree';
